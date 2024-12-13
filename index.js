@@ -31,8 +31,12 @@ app.post("/api/gastos", (req, res) => {
 })
 app.get("/api/gastos/:id", (req, res) => {
     const userID = new ObjectId(req.params.id)
-    console.log(userID)
+    // console.log(userID)
     Gasto.find({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error }))
+})
+app.delete("/api/gastos/:id", (req, res) => {
+    const userID = new ObjectId(req.params.id)
+    Gasto.deleteMany({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error }))
 })
 
 

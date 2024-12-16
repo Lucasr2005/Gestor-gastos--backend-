@@ -1,11 +1,12 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { mongoDbConnect } from "./mongoDbConnect.js";
 import mongoose from 'mongoose';
 const { ObjectId } = mongoose.Types;
 import { Gasto } from "./models/gastos.js";
-
+import { User } from "./models/user.js";
+import passwordHash from "password-hash";
 dotenv.config()
 const app = express()
 app.use(cors())
@@ -27,17 +28,70 @@ app.post("/api/gastos", (req, res) => {
     }
     gasto.save().then((response) => {
         res.send({ response })
-    }).catch((error) => res.status(400).json({ error }))
+    }).catch((error) => res.status(400).json({ error: error.message })
+    )
 })
 app.get("/api/gastos/:id", (req, res) => {
     const userID = new ObjectId(req.params.id)
-    // console.log(userID)
-    Gasto.find({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error }))
+    console.log(userID)
+
+    Gasto.find({ "userID": userID }).then((response) => {
+        console.log(response)
+        res.send(response)
+    })
+        .catch((error) => res.status(400).json({ error: error.message })
+        )
 })
 app.delete("/api/gastos/:id", (req, res) => {
     const userID = new ObjectId(req.params.id)
-    Gasto.deleteMany({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error }))
+    Gasto.deleteMany({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error: error.message })
+    )
 })
+
+//user
+app.get("/api/user", (req, res) => {
+    const email = req.query.email
+    const password = req.query.password
+    if (!email || !password) {
+        return res.status(400).json({
+            error: "Faltan datos"
+        })
+    }
+    User.findOne({ email: email }).then((response) => {
+        if (response) {
+            if (passwordHash.verify(password, response.password)) {
+                return res.status(200).json({
+                    _id: response._id
+                })
+            }
+        }
+
+        res.status(400).json({
+            error: "Datos incorrectos"
+        })
+
+
+    }).catch((error) => {
+        res.status(400).json({ error: error.message })
+
+    })
+})
+
+app.post("/api/user", (req, res) => {
+    const user = new User({
+        email: req.body.email,
+        password: passwordHash.generate(req.body.password)
+
+    })
+    console.log(passwordHash.generate(req.body.password))
+    user.save().then((response) => {
+        res.status(200).send(response)
+    }).catch((error) => {
+        res.status(400).json({ error: error.message.split(":")[0] })
+    })
+})
+
+
 
 
 const PORT = process.env.PORT

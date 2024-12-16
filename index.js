@@ -33,10 +33,8 @@ app.post("/api/gastos", (req, res) => {
 })
 app.get("/api/gastos/:id", (req, res) => {
     const userID = new ObjectId(req.params.id)
-    console.log(userID)
 
     Gasto.find({ "userID": userID }).then((response) => {
-        console.log(response)
         res.send(response)
     })
         .catch((error) => res.status(400).json({ error: error.message })
@@ -83,7 +81,6 @@ app.post("/api/user", (req, res) => {
         password: passwordHash.generate(req.body.password)
 
     })
-    console.log(passwordHash.generate(req.body.password))
     user.save().then((response) => {
         res.status(200).send(response)
     }).catch((error) => {

@@ -76,16 +76,36 @@ app.get("/api/user", (req, res) => {
 })
 
 app.post("/api/user", (req, res) => {
-    const user = new User({
-        email: req.body.email,
-        password: passwordHash.generate(req.body.password)
+    const email = req.body.email
+    const password = req.body.password
+    console.log(email, password)
+    if (!email || !password) {
+        return res.status(400).json({
+            error: "Faltan datos"
+        })
+    }
+    User.findOne({ email: email }).then((response) => {
+        console.log(!response)
+        if (!response) {
+            const user = new User({
+                email: email,
+                password: passwordHash.generate(password)
 
+            })
+            console.log(user)
+            user.save().then((response) => {
+                res.status(200).json({
+                    _id: response._id
+                })
+            }).catch((error) => {
+                res.status(400).json({ error: error.message.split(":")[0] })
+            })
+        }
+        else {
+            res.status(400).json({ error: "Correo ya registrado" })
+        }
     })
-    user.save().then((response) => {
-        res.status(200).send(response)
-    }).catch((error) => {
-        res.status(400).json({ error: error.message.split(":")[0] })
-    })
+
 })
 
 

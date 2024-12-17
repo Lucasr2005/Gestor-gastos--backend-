@@ -12,7 +12,10 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 mongoDbConnect();
+app.get("/api", (req, res) => {
+    res.send("Hola")
 
+})
 app.post("/api/gastos", (req, res) => {
     // const IdPedido = new ObjectId(id);
     const gasto = new Gasto({
@@ -78,14 +81,12 @@ app.get("/api/user", (req, res) => {
 app.post("/api/user", (req, res) => {
     const email = req.body.email
     const password = req.body.password
-    console.log(email, password)
     if (!email || !password) {
         return res.status(400).json({
             error: "Faltan datos"
         })
     }
     User.findOne({ email: email }).then((response) => {
-        console.log(!response)
         if (!response) {
             const user = new User({
                 email: email,

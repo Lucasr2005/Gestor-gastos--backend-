@@ -1,4 +1,6 @@
 import express, { response } from "express";
+import { inject } from "@vercel/analytics"
+inject()
 import cors from "cors";
 import dotenv from "dotenv";
 import { mongoDbConnect } from "./mongoDbConnect.js";
@@ -81,12 +83,15 @@ app.get("/api/user", (req, res) => {
 app.post("/api/user", (req, res) => {
     const email = req.body.email
     const password = req.body.password
+    console.log(email, password)
+
     if (!email || !password) {
         return res.status(400).json({
             error: "Faltan datos"
         })
     }
     User.findOne({ email: email }).then((response) => {
+        console.log(response)
         if (!response) {
             const user = new User({
                 email: email,
@@ -105,6 +110,9 @@ app.post("/api/user", (req, res) => {
         else {
             res.status(400).json({ error: "Correo ya registrado" })
         }
+    }).catch((error) => {
+        res.status(400).json({ error: error.message })
+
     })
 
 })

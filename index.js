@@ -36,19 +36,25 @@ app.post("/api/gastos", (req, res) => {
     )
 })
 app.get("/api/gastos/:id", (req, res) => {
-    const userID = new ObjectId(req.params.id)
+    const userID = new ObjectId(req.params.id);
 
-    Gasto.find({ "userID": userID }).then((response) => {
-        res.send(response)
-    })
-        .catch((error) => res.status(400).json({ error: error.message })
-        )
-})
-app.delete("/api/gastos/:id", (req, res) => {
-    const userID = new ObjectId(req.params.id)
-    Gasto.deleteMany({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error: error.message })
-    )
-})
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+
+    Gasto.find({
+        "userID": userID,
+        "fecha": { $gte: lastMonth }
+    }).then((response) => {
+        res.send(response);
+    }).catch((error) => {
+        res.status(400).json({ error: error.message });
+    });
+});
+// app.delete("/api/gastos/:id", (req, res) => {
+//     const userID = new ObjectId(req.params.id)
+//     Gasto.deleteMany({ "userID": userID }).then((response) => res.send(response)).catch((error) => res.status(400).json({ error: error.message })
+//     )
+// })
 
 //user
 app.get("/api/user", (req, res) => {

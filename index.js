@@ -1,6 +1,5 @@
 import express, { response } from "express";
-import { inject } from "@vercel/analytics"
-inject()
+
 import cors from "cors";
 import dotenv from "dotenv";
 import { mongoDbConnect } from "./mongoDbConnect.js";
@@ -117,7 +116,31 @@ app.post("/api/user", (req, res) => {
 
 })
 
+app.get("/api/user/googleLogin", (req, res) => {
+    const email = req.query.email
+    if (!email) {
+        return res.status(400).json({
+            error: "Faltan datos"
+        })
+    }
+    User.findOne({ email: email }).then((response) => {
+        if (response) {
+            return res.status(200).json({
+                _id: response._id
+            })
 
+        }
+
+        res.status(400).json({
+            error: "Datos incorrectos"
+        })
+
+
+    }).catch((error) => {
+        res.status(400).json({ error: error.message })
+
+    })
+})
 
 
 const PORT = process.env.PORT
